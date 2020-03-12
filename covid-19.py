@@ -48,7 +48,7 @@ def main(settings: dict) -> None:
         message += f"\n\nHittills {total - db_yesterday} nya fall rapporterade idag"
 
     payload = {
-        "username": "New and improved CoronaBot",
+        "username": "New and Improved CoronaBot",
         "text": message,
         "channel": slack_channel,
         "icon_emoji": ":biohazard_sign:",

@@ -1,7 +1,7 @@
 # covid-19-slacker-se
 
 ## requirements
-`pip install -r requirements.txt`
+`pip install -r requirements.txt`\
 you also need a redis instance running on localhost on default port (currently no auth)
 
 `config.json` in the same folder

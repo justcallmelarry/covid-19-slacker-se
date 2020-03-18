@@ -4,6 +4,7 @@ import sys
 
 import httpx
 import redis
+from bs4 import BeautifulSoup
 
 DIRPATH = os.path.join(os.path.dirname(__file__))
 
@@ -15,38 +16,49 @@ def main(settings: dict, force: bool) -> None:
 
     db = redis.Redis(host="localhost", port=6379, db=0)
 
-    raw_db_total = db.get("covid-19:total")
-    raw_db_stockholm = db.get("covid-19:stockholm")
+    raw_db_current = db.get("covid-19:current")
     raw_db_yesterday = db.get("covid-19:yesterday")
 
-    db_total = int(raw_db_total.decode()) if raw_db_total else 0
-    db_stockholm = int(raw_db_stockholm.decode()) if raw_db_stockholm else 0
-    db_yesterday = int(raw_db_yesterday.decode()) if raw_db_stockholm else 0
+    db_current = json.loads(raw_db_current.decode()) if raw_db_current else {}
+    db_yesterday = json.loads(raw_db_yesterday.decode()) if raw_db_yesterday else {}
 
-    data = httpx.get(data_url).json()
+    if not isinstance(db_yesterday, dict):
+        db_yesterday = {}
 
-    total = data.get("total")
+    data = httpx.get(data_url).text
 
-    for place in data.get("data", []):
-        area_count = place.get("antal")
-        if place.get("kod") == "01":
-            break
+    page = BeautifulSoup(data, "html.parser")
 
-    if total == db_total and not force:
+    infected = int(page.find("span", {"class": "text-danger"}).text)
+    # cured = int(page.find("span", {"class": "text-success"}).text)
+    deaths = int(page.find("span", {"class": "text-dark"}).text)
+
+    if all(
+        [
+            infected <= db_current.get("infected", 0),
+            deaths <= db_current.get("deaths", 0),
+            not force,
+        ]
+    ):
         return
 
-    message = f"{total} bekräftat smittade i Sverige"
-    if db_total:
-        message += f" ({total - db_total} nya sedan förra uppdateringen)"
+    message = f"{infected} bekräftat smittade i Sverige"
 
-    message += f"\nVarav {area_count} i Stockholm"
+    message += f"\nDet har totalt rapporterats {deaths} dödsfall"
 
-    new_sthlm = area_count - db_stockholm
-    if db_stockholm and new_sthlm:
-        message += f" ({new_sthlm} nya sedan förra uppdateringen)"
+    diff_infected = infected - db_current.get("infected", 0)
+    if diff_infected:
+        message += f" ({diff_infected} sedan förra uppdateringen)"
 
-    if total - db_yesterday > 0:
-        message += f"\n\nHittills {total - db_yesterday} nya fall rapporterade idag"
+    diff_deaths = deaths > db_current.get("deaths", 0)
+    if diff_deaths:
+        message += f" ({diff_deaths} sedan förra uppdateringen)"
+
+    infected_today = infected - db_yesterday.get("infected", 0)
+    deaths_today = deaths - db_yesterday.get("deaths", 0)
+    message += (
+        f"\n\nHittills {infected_today} nya fall och {deaths_today} dödsfall rapporterade idag"
+    )
 
     payload = {
         "username": "COVID-19",
@@ -57,8 +69,7 @@ def main(settings: dict, force: bool) -> None:
 
     response = httpx.post(slack_webhook, data=json.dumps(payload))
 
-    db.set("covid-19:total", total)
-    db.set("covid-19:stockholm", area_count)
+    db.set("covid-19:current", json.dumps({"infected": infected, "deaths": deaths}))
 
     if response.status_code != 200:
         print(response.text())

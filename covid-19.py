@@ -44,13 +44,13 @@ def main(settings: dict, force: bool) -> None:
 
     message = f"{infected} bekräftat smittade i Sverige"
 
-    message += f"\nDet har totalt rapporterats {deaths} dödsfall"
-
     diff_infected = infected - db_current.get("infected", 0)
     if diff_infected:
         message += f" ({diff_infected} sedan förra uppdateringen)"
 
-    diff_deaths = deaths > db_current.get("deaths", 0)
+    message += f"\nDet har totalt rapporterats {deaths} dödsfall"
+
+    diff_deaths = deaths - db_current.get("deaths", 0)
     if diff_deaths:
         message += f" ({diff_deaths} sedan förra uppdateringen)"
 

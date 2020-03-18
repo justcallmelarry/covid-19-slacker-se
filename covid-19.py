@@ -1,5 +1,6 @@
 import json
 import os.path
+import sys
 
 import httpx
 import redis
@@ -7,7 +8,7 @@ import redis
 DIRPATH = os.path.join(os.path.dirname(__file__))
 
 
-def main(settings: dict) -> None:
+def main(settings: dict, force: bool) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_channel")
     data_url = settings.get("data_url")
@@ -31,7 +32,7 @@ def main(settings: dict) -> None:
         if place.get("kod") == "01":
             break
 
-    if total == db_total:
+    if total == db_total and not force:
         return
 
     message = f"{total} bekräftat smittade i Sverige"
@@ -67,4 +68,6 @@ if __name__ == "__main__":
     with open(os.path.join(DIRPATH, "config.json")) as config_file:
         settings = json.load(config_file)
 
-    main(settings)
+    force = True if "-f" in sys.argv else False
+
+    main(settings, force)

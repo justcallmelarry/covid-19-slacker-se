@@ -35,8 +35,8 @@ def main(settings: dict, force: bool) -> None:
 
     if all(
         [
-            infected <= db_current.get("infected", 0),
-            deaths <= db_current.get("deaths", 0),
+            infected != db_current.get("infected", 0),
+            deaths != db_current.get("deaths", 0),
             not force,
         ]
     ):

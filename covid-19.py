@@ -33,7 +33,7 @@ def main(settings: dict, force: bool) -> None:
     # cured = int(page.find("span", {"class": "text-success"}).text)
     deaths = int(page.find("span", {"class": "text-dark"}).text)
 
-    if any(
+    if not any(
         [infected != db_current.get("infected", 0), deaths != db_current.get("deaths", 0), force]
     ):
         return

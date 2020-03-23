@@ -7,7 +7,7 @@ you also need a redis instance running on localhost on default port (currently n
 `config.json` in the same folder
 ```json
 {
-    "data_url": "https://www.svt.se/special/articledata/2322/sverige.json",
+    "data_url": "https://c19.se",
     "slack_webhook": "https://hooks.slack.com/services/you/webhook/here",
     "slack_channel": "#covid-19-reporting"
 }

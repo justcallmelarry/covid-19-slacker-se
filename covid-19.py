@@ -39,19 +39,29 @@ def slack_message(settings: dict, data: Covid19) -> None:
 
     infected_value = f"{data.infected}"
     if data.infected_updated:
-        infected_value += f" (+{data.infected_updated})" if data.infected_updated > 0 else " ({})"
+        infected_value += (
+            f" (+{data.infected_updated})"
+            if data.infected_updated > 0
+            else f" ({data.infected_updated})"
+        )
 
     deaths_value = f"{data.deaths}"
     if data.infected_updated:
-        deaths_value += f" (+{data.deaths_updated})" if data.deaths_updated > 0 else " ({})"
+        deaths_value += (
+            f" (+{data.deaths_updated})" if data.deaths_updated > 0 else f" ({data.deaths_updated})"
+        )
 
     icu_value = f"{data.icu}"
     if data.icu_updated:
-        icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else " ({})"
+        icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else f" ({data.icu_updated})"
 
     sthlm_value = f"{data.stockholm}"
     if data.icu_updated:
-        sthlm_value += f" (+{data.stockholm_updated})" if data.stockholm_updated > 0 else " ({})"
+        sthlm_value += (
+            f" (+{data.stockholm_updated})"
+            if data.stockholm_updated > 0
+            else f" ({data.stockholm_updated})"
+        )
 
     payload = {
         "link_names": 1,

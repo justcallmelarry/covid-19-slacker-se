@@ -64,12 +64,12 @@ def slack_message(settings: dict, data: Covid19) -> None:
                 "text": "Alla siffror gäller rapporterade fall",
                 "fields": [
                     {"title": "Smittade totalt", "value": infected_value, "short": True},
-                    {"title": "Dödsfall totalt", "value": deaths_value, "short": True},
-                    {"title": "Stockholm totalt", "value": sthlm_value, "short": True},
-                    {"title": "Intensivvård totalt", "value": icu_value, "short": True},
                     {"title": "Smittade idag", "value": f"{data.infected_today}", "short": True},
-                    {"title": "Dödsfall idag", "value": f"{data.deaths_today}", "short": True},
+                    {"title": "Stockholm totalt", "value": sthlm_value, "short": True},
                     {"title": "Stockholm idag", "value": f"{data.stockholm_today}", "short": True},
+                    {"title": "Dödsfall totalt", "value": deaths_value, "short": True},
+                    {"title": "Dödsfall idag", "value": f"{data.deaths_today}", "short": True},
+                    {"title": "Intensivvård totalt", "value": icu_value, "short": True},
                     {"title": "Intensivvård idag", "value": f"{data.icu_today}", "short": True},
                 ],
             }

@@ -13,11 +13,19 @@ DIRPATH = os.path.join(os.path.dirname(__file__))
 @dataclass
 class Covid19:
     deaths: int
+    icu: int
     infected: int
+    stockholm: int
+
     deaths_updated: int
+    icu_updated: int
     infected_updated: int
+    stockholm_updated: int
+
     deaths_today: int
+    icu_today: int
     infected_today: int
+    stockholm_today: int
 
     force: bool = False
 
@@ -29,15 +37,21 @@ def slack_message(settings: dict, data: Covid19) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_channel")
 
-    messages = []
-
+    infected_value = f"{data.infected}"
     if data.infected_updated:
-        f"{data.infected_updated} rapporterade fall"
+        infected_value += f" (+{data.infected_updated})" if data.infected_updated > 0 else " ({})"
 
-    if data.deaths_updated:
-        f"{data.deaths_updated} dödsfall"
+    deaths_value = f"{data.deaths}"
+    if data.infected_updated:
+        deaths_value += f" (+{data.deaths_updated})" if data.deaths_updated > 0 else " ({})"
 
-    message = " och ".join(messages) + "sedan förra uppdateringen"
+    icu_value = f"{data.icu}"
+    if data.icu_updated:
+        icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else " ({})"
+
+    sthlm_value = f"{data.stockholm}"
+    if data.icu_updated:
+        sthlm_value += f" (+{data.stockholm_updated})" if data.stockholm_updated > 0 else " ({})"
 
     payload = {
         "link_names": 1,
@@ -46,13 +60,17 @@ def slack_message(settings: dict, data: Covid19) -> None:
         "icon_emoji": ":biohazard_sign:",
         "attachments": [
             {
-                "title": "Nya uppdateringar",
-                "text": message,
+                "title": "Senaste läget",
+                "text": "Alla siffror gäller rapporterade fall",
                 "fields": [
-                    {"title": "Rapporterade fall totalt", "value": f"{data.infected}", "short": True},
-                    {"title": "Dödsfall totalt", "value": f"{data.deaths}", "short": True},
-                    {"title": "Rapporterade fall idag", "value": f"{data.infected_today}", "short": True},
+                    {"title": "Smittade totalt", "value": infected_value, "short": True},
+                    {"title": "Dödsfall totalt", "value": deaths_value, "short": True},
+                    {"title": "Stockholm totalt", "value": sthlm_value, "short": True},
+                    {"title": "Intensivvård totalt", "value": icu_value, "short": True},
+                    {"title": "Smittade idag", "value": f"{data.infected_today}", "short": True},
                     {"title": "Dödsfall idag", "value": f"{data.deaths_today}", "short": True},
+                    {"title": "Stockholm idag", "value": f"{data.stockholm_today}", "short": True},
+                    {"title": "Intensivvård idag", "value": f"{data.icu_today}", "short": True},
                 ],
             }
         ],
@@ -81,17 +99,37 @@ def main(settings: dict, force: bool) -> None:
 
     page = BeautifulSoup(response, "html.parser")
 
-    infected = int(page.find("span", {"class": "text-danger"}).text)
-    # cured = int(page.find("span", {"class": "text-success"}).text)
-    deaths = int(page.find("span", {"class": "text-dark"}).text)
+    area_content = page.findAll("div", {"class": "area-content"})
+
+    for area in area_content:
+        if area.p and area.p.text == "Smittade":
+            infected = int(area.h3.text)
+
+        if area.p and area.p.text == "Dödsfall":
+            deaths = int(area.h3.text)
+
+        if area.p and area.p.text == "Intensivvård":
+            icu = int(area.h3.text)
+
+        if area.h3 and area.h3.text == "Stockholm":
+            stockholm = int(area.find("span", {"class": "total"}).text)
 
     data = Covid19(
-        infected=int(page.find("span", {"class": "text-danger"}).text),
-        deaths=int(page.find("span", {"class": "text-dark"}).text),
-        infected_updated=infected - db_current.get("infected", 0),
+        # totals
+        deaths=deaths,
+        icu=icu,
+        infected=infected,
+        stockholm=stockholm,
+        # updates
         deaths_updated=deaths - db_current.get("deaths", 0),
+        icu_updated=icu - db_current.get("icu", 0),
+        infected_updated=infected - db_current.get("infected", 0),
+        stockholm_updated=stockholm - db_current.get("stockholm", 0),
+        # todays numbers
+        deaths_today=deaths - db_yesterday.get("deaths", 0),
+        icu_today=icu - db_yesterday.get("icu", 0),
         infected_today=infected - db_yesterday.get("infected", 0),
-        deaths_today=deaths - db_yesterday.get("deaths", 0)
+        stockholm_today=stockholm - db_yesterday.get("stockholm", 0),
     )
 
     if force:
@@ -102,7 +140,10 @@ def main(settings: dict, force: bool) -> None:
 
     slack_message(settings, data)
 
-    db.set("covid-19:current", json.dumps({"infected": infected, "deaths": deaths}))
+    db.set(
+        "covid-19:current",
+        json.dumps({"infected": infected, "deaths": deaths, "icu": icu, "stockholm": stockholm}),
+    )
 
 
 if __name__ == "__main__":

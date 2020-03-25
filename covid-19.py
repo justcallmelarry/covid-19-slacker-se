@@ -46,7 +46,7 @@ def slack_message(settings: dict, data: Covid19) -> None:
         )
 
     deaths_value = f"{data.deaths}"
-    if data.infected_updated:
+    if data.deaths_updated:
         deaths_value += (
             f" (+{data.deaths_updated})" if data.deaths_updated > 0 else f" ({data.deaths_updated})"
         )
@@ -56,7 +56,7 @@ def slack_message(settings: dict, data: Covid19) -> None:
         icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else f" ({data.icu_updated})"
 
     sthlm_value = f"{data.stockholm}"
-    if data.icu_updated:
+    if data.stockholm_updated:
         sthlm_value += (
             f" (+{data.stockholm_updated})"
             if data.stockholm_updated > 0

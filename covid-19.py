@@ -115,10 +115,10 @@ def main(settings: dict, force: bool) -> None:
         if area.p and area.p.text == "Smittade":
             infected = int(area.h3.text)
 
-        if area.p and area.p.text == "Dödsfall":
+        if area.p and area.p.text == "Döda":
             deaths = int(area.h3.text)
 
-        if area.p and area.p.text == "Intensivvård":
+        if area.p and area.p.text == "Intensivvårdsfall":
             icu = int(area.h3.text)
 
         if area.h3 and area.h3.text == "Stockholm":

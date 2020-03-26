@@ -78,7 +78,7 @@ def slack_message(settings: dict, data: Covid19) -> None:
         "icon_emoji": ":biohazard_sign:",
         "attachments": [
             {
-                "title": "Senaste läget",
+                "title": "Läget just nu",
                 "text": "Alla siffror gäller rapporterade fall",
                 "fields": [
                     {"title": "Smittade totalt", "value": infected_value, "short": True},

@@ -30,38 +30,12 @@ class Covid19:
     force: bool = False
 
     def has_updates(self) -> bool:
-        return any([self.deaths_updated, self.infected_updated, force])
+        return any([self.deaths_updated, self.infected_updated, self.icu_updated, force])
 
 
 def slack_message(settings: dict, data: Covid19) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_channel")
-
-    infected_value = f"{data.infected}"
-    if data.infected_updated:
-        infected_value += (
-            f" (+{data.infected_updated})"
-            if data.infected_updated > 0
-            else f" ({data.infected_updated})"
-        )
-
-    deaths_value = f"{data.deaths}"
-    if data.deaths_updated:
-        deaths_value += (
-            f" (+{data.deaths_updated})" if data.deaths_updated > 0 else f" ({data.deaths_updated})"
-        )
-
-    icu_value = f"{data.icu}"
-    if data.icu_updated:
-        icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else f" ({data.icu_updated})"
-
-    sthlm_value = f"{data.stockholm}"
-    if data.stockholm_updated:
-        sthlm_value += (
-            f" (+{data.stockholm_updated})"
-            if data.stockholm_updated > 0
-            else f" ({data.stockholm_updated})"
-        )
 
     payload = {
         "link_names": 1,
@@ -73,13 +47,13 @@ def slack_message(settings: dict, data: Covid19) -> None:
                 "title": "Senaste läget",
                 "text": "Alla siffror gäller rapporterade fall",
                 "fields": [
-                    {"title": "Smittade totalt", "value": infected_value, "short": True},
+                    {"title": "Smittade totalt", "value": f"{data.infected}", "short": True},
                     {"title": "Smittade idag", "value": f"{data.infected_today}", "short": True},
-                    {"title": "Stockholm totalt", "value": sthlm_value, "short": True},
+                    {"title": "Stockholm totalt", "value": f"{data.stockholm}", "short": True},
                     {"title": "Stockholm idag", "value": f"{data.stockholm_today}", "short": True},
-                    {"title": "Dödsfall totalt", "value": deaths_value, "short": True},
+                    {"title": "Dödsfall totalt", "value": f"{data.deaths}", "short": True},
                     {"title": "Dödsfall idag", "value": f"{data.deaths_today}", "short": True},
-                    {"title": "Intensivvård totalt", "value": icu_value, "short": True},
+                    {"title": "Intensivvård totalt", "value": f"{data.icu}", "short": True},
                     {"title": "Intensivvård idag", "value": f"{data.icu_today}", "short": True},
                 ],
             }

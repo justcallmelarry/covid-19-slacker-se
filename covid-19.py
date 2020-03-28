@@ -120,7 +120,7 @@ def main(settings: dict, force: bool) -> None:
     area_content = page.findAll("div", {"class": "area-content"})
 
     for area in area_content:
-        if area.p and area.p.text == "Smittade":
+        if area.p and area.p.text == "Bekräftade fall":
             infected = int(area.h3.text)
 
         if area.p and area.p.text == "Döda":

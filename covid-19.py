@@ -41,6 +41,17 @@ class Covid19:
         )
 
 
+def slack_error_message(settings: dict) -> None:
+    slack_webhook = settings.get("slack_webhook")
+    slack_channel = settings.get("slack_error_channel")
+
+    response = httpx.post(
+        slack_webhook, data=json.dumps({"text": "c19 changes", "channel": slack_channel}),
+    )
+    if response.status_code != 200:
+        print(response.text())
+
+
 def slack_message(settings: dict, data: Covid19) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_channel")
@@ -120,7 +131,7 @@ def main(settings: dict, force: bool) -> None:
     area_content = page.findAll("div", {"class": "area-content"})
 
     for area in area_content:
-        if area.p and area.p.text == "Fall":
+        if area.p and area.p.text == "Falsl":
             infected = int(area.h3.text)
 
         if area.p and area.p.text == "Döda":
@@ -170,4 +181,7 @@ if __name__ == "__main__":
 
     force = True if "-f" in sys.argv else False
 
-    main(settings, force)
+    try:
+        main(settings, force)
+    except Exception:
+        slack_error_message(settings)

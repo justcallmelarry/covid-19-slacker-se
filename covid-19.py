@@ -35,7 +35,7 @@ class Covid19:
                 self.deaths_updated,
                 self.infected_updated,
                 self.icu_updated,
-                self.stockholm_updated,
+                self.stockholm and self.stockholm_updated,
                 force,
             ]
         )

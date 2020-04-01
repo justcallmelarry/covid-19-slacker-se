@@ -186,7 +186,14 @@ def main(settings: dict, force: bool) -> None:
 
     db.set(
         "covid-19:current",
-        json.dumps({"infected": infected, "deaths": deaths, "icu": icu, "stockholm": stockholm}),
+        json.dumps(
+            {
+                "infected": infected,
+                "deaths": deaths,
+                "icu": icu,
+                "stockholm": stockholm if stockholm else db_current.get("stockholm", 0),
+            }
+        ),
     )
 
 

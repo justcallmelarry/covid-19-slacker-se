@@ -41,12 +41,12 @@ class Covid19:
         )
 
 
-def slack_error_message(settings: dict) -> None:
+def slack_error_message(settings: dict, e: Exception) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_error_channel")
 
     response = httpx.post(
-        slack_webhook, data=json.dumps({"text": "c19 changes", "channel": slack_channel}),
+        slack_webhook, data=json.dumps({"text": f"c19 changes: {e}", "channel": slack_channel}),
     )
     if response.status_code != 200:
         print(response.text())
@@ -205,5 +205,5 @@ if __name__ == "__main__":
 
     try:
         main(settings, force)
-    except Exception:
-        slack_error_message(settings)
+    except Exception as e:
+        slack_error_message(settings, e)

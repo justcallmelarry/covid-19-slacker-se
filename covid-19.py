@@ -13,17 +13,14 @@ DIRPATH = os.path.join(os.path.dirname(__file__))
 @dataclass
 class Covid19:
     deaths: int
-    icu: int
     infected: int
     stockholm: int
 
     deaths_updated: int
-    icu_updated: int
     infected_updated: int
     stockholm_updated: int
 
     deaths_today: int
-    icu_today: int
     infected_today: int
     stockholm_today: int
 
@@ -34,7 +31,6 @@ class Covid19:
             [
                 self.deaths_updated,
                 self.infected_updated,
-                self.icu_updated,
                 self.stockholm and self.stockholm_updated,
                 force,
             ]
@@ -96,15 +92,6 @@ def slack_message(settings: dict, data: Covid19) -> None:
         {"title": "Dödsfall idag", "value": f"{data.deaths_today}", "short": True},
     ]
 
-    icu_value = f"{data.icu}"
-    if data.icu_updated:
-        icu_value += f" (+{data.icu_updated})" if data.icu_updated > 0 else f" ({data.icu_updated})"
-
-    fields += [
-        {"title": "Intensivvård totalt", "value": icu_value, "short": True},
-        {"title": "Intensivvård idag", "value": f"{data.icu_today}", "short": True},
-    ]
-
     payload = {
         "link_names": 1,
         "username": "COVID-19",
@@ -152,26 +139,20 @@ def main(settings: dict, force: bool) -> None:
         if area.p and area.p.text == "Döda":
             deaths = int(area.h3.text)
 
-        if area.p and area.p.text == "På IVA":
-            icu = int(area.h3.text)
-
         if area.h3 and area.h3.text == "Stockholm":
             stockholm = int(area.find("span", {"class": "total"}).text)
 
     data = Covid19(
         # totals
         deaths=deaths,
-        icu=icu,
         infected=infected,
         stockholm=stockholm,
         # updates
         deaths_updated=deaths - db_current.get("deaths", 0),
-        icu_updated=icu - db_current.get("icu", 0),
         infected_updated=infected - db_current.get("infected", 0),
         stockholm_updated=stockholm - db_current.get("stockholm", 0),
         # todays numbers
         deaths_today=deaths - db_yesterday.get("deaths", 0),
-        icu_today=icu - db_yesterday.get("icu", 0),
         infected_today=infected - db_yesterday.get("infected", 0),
         stockholm_today=stockholm - db_yesterday.get("stockholm", 0),
     )
@@ -190,7 +171,6 @@ def main(settings: dict, force: bool) -> None:
             {
                 "infected": infected,
                 "deaths": deaths,
-                "icu": icu,
                 "stockholm": stockholm if stockholm else db_current.get("stockholm", 0),
             }
         ),

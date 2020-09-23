@@ -37,6 +37,10 @@ class Covid19:
         )
 
 
+def intify(string: str) -> int:
+    return int("".join(x for x in string if x.isnumeric()))
+
+
 def slack_error_message(settings: dict, e: Exception) -> None:
     slack_webhook = settings.get("slack_webhook")
     slack_channel = settings.get("slack_error_channel")
@@ -134,13 +138,13 @@ def main(settings: dict, force: bool) -> None:
 
     for area in area_content:
         if area.p and area.p.text == "Fall":
-            infected = int(area.h3.text)
+            infected = intify(area.h3.text)
 
         if area.p and area.p.text == "Döda":
-            deaths = int(area.h3.text)
+            deaths = intify(area.h3.text)
 
         if area.h3 and area.h3.text == "Stockholm":
-            stockholm = int(area.find("span", {"class": "total"}).text)
+            stockholm = intify(area.find("span", {"class": "total"}).text)
 
     data = Covid19(
         # totals

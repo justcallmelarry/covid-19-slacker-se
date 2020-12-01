@@ -194,4 +194,7 @@ if __name__ == "__main__":
         if "--debug" in sys.argv:
             raise e
 
+        if isinstance(e, httpx.NetworkError) and "certificate has expired" in str(e):
+            sys.exit()
+
         slack_error_message(settings, e)

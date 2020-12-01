@@ -46,7 +46,8 @@ def slack_error_message(settings: dict, e: Exception) -> None:
     slack_channel = settings.get("slack_error_channel")
 
     response = httpx.post(
-        slack_webhook, data=json.dumps({"text": f"c19 changes: {e}", "channel": slack_channel}),
+        slack_webhook,
+        data=json.dumps({"text": f"c19 changes: {e}", "channel": slack_channel}),
     )
     if response.status_code != 200:
         print(response.text())
@@ -190,4 +191,7 @@ if __name__ == "__main__":
     try:
         main(settings, force)
     except Exception as e:
+        if "--debug" in sys.argv:
+            raise e
+
         slack_error_message(settings, e)

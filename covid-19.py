@@ -130,7 +130,7 @@ def main(settings: dict, force: bool) -> None:
     if not isinstance(db_yesterday, dict):
         db_yesterday = {}
 
-    response = httpx.get(data_url).text
+    response = httpx.get(data_url, verify=False).text
 
     page = BeautifulSoup(response, "html.parser")
 
